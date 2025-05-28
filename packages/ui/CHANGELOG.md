@@ -1,5 +1,19 @@
 # next-docs-ui
 
+## 15.5.0
+
+### Minor Changes
+
+- 589d101: **Move TOC closer to page body on larger viewports**
+
+  Note that this may impact sites using custom styling.
+
+  For Fumadocs CLI users: you can re-install the layout components again to get the latest look.
+
+### Patch Changes
+
+- fumadocs-core@15.5.0
+
 ## 15.4.2
 
 ### Patch Changes
