@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロトレーダーへの道 - Fundora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* 全体的なスタイル */
+        body {
+            background-color: #332E2B; /* 全体背景 */
+            color: #F5F5F5; /* テキスト */
+            font-family: 'Noto Sans JP', sans-serif; /* 基本フォント */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px; /* スマホ表示を考慮したパディング */
+            box-sizing: border-box;
+            overflow-y: auto; /* コンテンツが溢れた場合にスクロール可能に */
+        }
+
+        /* ゲームコンテナ */
+        .game-container {
+            background-color: #1e1a18; /* コンテナ背景色 */
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 600px; /* 最大幅 */
+            width: 100%; /* レスポンシブ対応 */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            margin: auto; /* 中央寄せ */
+            border: 1px solid #EF6A00; /* Fundora感を出す枠線 */
+            animation: containerGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes containerGlow {
+            0% { box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(239, 106, 0, 0.3); }
+        }
+
+        /* タイトル */
+        h1 {
+            color: #EF6A00; /* タイトル色 */
+            font-family: 'Ubuntu', sans-serif; /* Fundoraタイトルフォント */
+            margin-bottom: 20px;
+            font-size: clamp(1.8em, 6vw, 3em); /* レスポンシブフォントサイズ */
+            text-shadow: 0 0 8px rgba(239, 106, 0, 0.5); /* 光沢感 */
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* ストーリーテキスト */
+        .story-text {
+            margin-bottom: 30px;
+            font-size: clamp(0.9em, 2.5vw, 1em); /* レスポンシブフォントサイズ */
+            line-height: 1.8; /* 行間を広めに */
+            text-align: left;
+            border-left: 4px solid #EF6A00; /* Fundora感を出す装飾 */
+            padding-left: 15px;
+            color: #E0E0E0; /* 少し薄めのテキスト色 */
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ボタン共通スタイル */
+        .game-button {
+            background-color: #EF6A00; /* ボタン背景 */
+            color: #F5F5F5; /* ボタンテキスト */
+            border: none;
+            padding: 15px 30px;
+            font-size: clamp(1em, 3vw, 1.2em); /* レスポンシブフォントサイズ */
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Noto Sans JP', sans-serif; /* ボタンフォント */
+            margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* ボタンの影 */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .game-button:hover::before {
+            left: 100%;
+        }
+
+        .game-button:hover {
+            background-color: #d05c00; /* ホバー時の色 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .game-button:active {
+            transform: scale(0.98); /* クリック時のエフェクト */
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 問題表示エリア */
+        .question-area {
+            display: none; /* 初期状態では非表示 */
+            text-align: left;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .question-area h2 {
+             color: #EF6A00; /* 問題タイトル色 */
+             margin-bottom: 20px;
+             font-size: clamp(1.2em, 4vw, 1.5em); /* レスポンシブフォントサイズ */
+             border-bottom: 2px solid #EF6A00; /* 区切り線 */
+             padding-bottom: 10px;
+        }
+
+        .question-text {
+             margin-bottom: 20px;
+             font-size: clamp(1em, 3vw, 1.1em); /* レスポンシブフォントサイズ */
+             line-height: 1.6;
+             /* animation: typewriter 1s steps(40) forwards; */ /* Removed for better UX with dynamic content */
+             white-space: pre-wrap; /* Allows for line breaks in question text */
+        }
+
+        /* @keyframes typewriter {
+             from { width: 0; overflow: hidden; }
+             to { width: 100%; }
+        } */
+
+        /* 選択肢リスト */
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .options-list li {
+            background-color: #554d48; /* 選択肢背景色 */
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: clamp(0.9em, 2.5vw, 1em); /* レスポンシブフォントサイズ */
+            line-height: 1.4;
+            border: 1px solid transparent; /* 選択時の枠線用 */
+            transform: translateX(-100px);
+            opacity: 0;
+            animation: slideInOptions 0.5s ease-out forwards;
+        }
+
+        @keyframes slideInOptions {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .options-list li:nth-child(1) { animation-delay: 0.1s; }
+        .options-list li:nth-child(2) { animation-delay: 0.2s; }
+        .options-list li:nth-child(3) { animation-delay: 0.3s; }
+        .options-list li:nth-child(4) { animation-delay: 0.4s; }
+
+        .options-list li:hover {
+            background-color: #6a625d; /* 選択肢ホバー時の色 */
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+         .options-list li:active {
+            transform: scale(0.98); /* クリック時のエフェクト */
+        }
+
+        /* 選択肢選択時の視覚的フィードバック */
+        .options-list li.selected {
+           border: 2px solid #EF6A00; /* 選択された選択肢の枠線 */
+           animation: selectedPulse 0.5s ease-in-out;
+        }
+
+        @keyframes selectedPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* フィードバックエリア */
+        .feedback-area {
+            display: none; /* 初期状態では非表示 */
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+            border: 1px solid transparent; /* 枠線用 */
+            animation: feedbackSlide 0.5s ease-out;
+        }
+
+        @keyframes feedbackSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback-area.correct {
+            background-color: #28a745; /* 正解時の背景色 */
+             border-color: #28a745;
+             animation: correctShake 0.6s ease-in-out, feedbackSlide 0.5s ease-out; /* Combined animations */
+        }
+
+        @keyframes correctShake {
+            0%, 100% { transform: translateX(0) translateY(0); } /* Adjusted for combined animation */
+            25% { transform: translateX(-5px) translateY(0); }
+            75% { transform: translateX(5px) translateY(0); }
+        }
+
+         .feedback-area.incorrect {
+            background-color: #dc3545; /* 不正解時の背景色 */
+             border-color: #dc3545;
+             animation: incorrectShake 0.6s ease-in-out, feedbackSlide 0.5s ease-out; /* Combined animations */
+        }
+
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0) translateY(0); } /* Adjusted for combined animation */
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px) translateY(0); }
+            20%, 40%, 60%, 80% { transform: translateX(5px) translateY(0); }
+        }
+
+        .feedback-area h3 {
+            margin-top: 0;
+            color: #F5F5F5;
+            font-size: clamp(1em, 3vw, 1.2em); /* レスポンシブフォントサイズ */
+            margin-bottom: 10px;
+        }
+
+        .feedback-area p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+             font-size: clamp(0.9em, 2.5vw, 1em); /* レスポンシブフォントサイズ */
+        }
+
+        /* 進行状況バーコンテナ */
+         .progress-bar-container {
+            width: 100%;
+            background-color: #554d48;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            height: 20px;
+            overflow: hidden; /* プログレスバーがはみ出さないように */
+            border: 1px solid #EF6A00; /* Fundora感を出す枠線 */
+        }
+
+        /* 進行状況バー */
+        .progress-bar {
+            height: 100%;
+            width: 0%; /* 初期状態 */
+            background: linear-gradient(90deg, #EF6A00, #ff8533);
+            border-radius: 5px;
+            transition: width 0.8s ease-in-out; /* アニメーション */
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: progressShine 2s linear infinite;
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* ステータス情報 */
+         .status-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: clamp(0.8em, 2vw, 0.9em); /* レスポンシブフォントサイズ */
+            flex-wrap: wrap; /* 要素が収まらない場合に折り返す */
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #554d48; /* 区切り線 */
+        }
+
+        .status-info span {
+            flex-grow: 1; /* 要素が均等にスペースを占めるように */
+            text-align: center;
+            margin: 5px; /* 要素間の余白 */
+            transition: color 0.3s ease;
+        }
+
+        .status-info span:hover {
+            color: #EF6A00;
+        }
+
+        /* ゲーム終了画面 */
+        #end-screen {
+            display: none; /* 初期状態では非表示 */
+             text-align: center;
+             animation: endScreenFade 1s ease-out;
+        }
+
+        @keyframes endScreenFade {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+         #end-screen h2 {
+            color: #EF6A00;
+            margin-bottom: 20px;
+            font-size: clamp(1.5em, 5vw, 2em); /* レスポンシブフォントサイズ */
+            text-shadow: 0 0 8px rgba(239, 106, 0, 0.5); /* 光沢感 */
+            animation: titlePulse 2s ease-in-out infinite;
+         }
+
+         #weakness-feedback {
+             margin-top: 30px;
+             padding-top: 20px;
+             border-top: 1px solid #554d48; /* 区切り線 */
+         }
+
+         #weakness-feedback h3 {
+             color: #EF6A00;
+             margin-top: 0;
+             margin-bottom: 15px;
+             font-size: clamp(1em, 3vw, 1.2em); /* レスポンシブフォントサイズ */
+             text-align: left;
+         }
+
+         #weakness-feedback ul {
+             list-style: none;
+             padding: 0;
+             text-align: left;
+         }
+
+         #weakness-feedback li {
+             background-color: #554d48;
+             margin-bottom: 10px;
+             padding: 10px;
+             border-radius: 5px;
+             font-size: clamp(0.9em, 2.5vw, 1em); /* レスポンシブフォントサイズ */
+             animation: fadeInUp 0.5s ease-out forwards;
+             opacity: 0;
+         }
+
+         #weakness-feedback li:nth-child(1) { animation-delay: 0.1s; }
+         #weakness-feedback li:nth-child(2) { animation-delay: 0.2s; }
+         #weakness-feedback li:nth-child(3) { animation-delay: 0.3s; }
+
+        /* 背景パーティクルアニメーション */
+        .particle {
+            position: fixed; /* Changed to fixed to ensure they are behind the content */
+            width: 4px;
+            height: 4px;
+            background-color: #EF6A00;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 6s linear infinite;
+            z-index: -1; /* Ensure particles are behind the game container */
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div id="start-screen">
+        <h1>Fundora</h1>
+        <div class="story-text">
+            プロトレーダーへの挑戦へようこそ！<br><br>
+            Fundoraは、あなたが長期的に市場で勝ち続けるための登竜門です。<br>
+            この試練を通じて知識を武器に変え、リスク管理の技術を磨きましょう。<br>
+            努力こそが、ここで評価される唯一の通貨です。
+        </div>
+        <button class="game-button" id="start-game-button">挑戦を開始する</button>
+    </div>
+
+    <div id="game-screen" style="display: none;">
+        <div class="status-info">
+            <span id="experience-points">得点: 0</span>
+            <span id="completion-percentage">進行度: 0%</span>
+            <span id="title">称号: 見習い</span>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="question-area" id="question-area">
+            <h2 id="question-number">問題 1/20</h2>
+            <p class="question-text" id="question-text"></p>
+            <ul class="options-list" id="options-list">
+            </ul>
+        </div>
+        <div class="feedback-area" id="feedback-area">
+            <h3 id="feedback-title"></h3>
+            <p id="feedback-correct-answer"></p>
+            <p id="feedback-explanation"></p>
+            <p id="feedback-learning-points"></p>
+            <button class="game-button" id="next-question-button">次へ進む</button>
+        </div>
+    </div>
+
+    <div id="end-screen" style="display:none;"> <h2 id="end-title"></h2>
+        <p id="final-score"></p>
+        <div id="weakness-feedback">
+            <h3>あなたの課題（不正解だった問題）</h3>
+            <ul id="incorrect-questions-list">
+            </ul>
+        </div>
+        <button class="game-button" id="restart-game-button">もう一度挑戦する</button>
+    </div>
+</div>
+
+<script>
+    // DOM要素の取得
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreenElement = document.getElementById('end-screen'); // Renamed to avoid conflict
+    const startGameButton = document.getElementById('start-game-button');
+    const questionArea = document.getElementById('question-area');
+    const questionNumberElement = document.getElementById('question-number');
+    const questionTextElement = document.getElementById('question-text');
+    const optionsListElement = document.getElementById('options-list');
+    const feedbackArea = document.getElementById('feedback-area');
+    const feedbackTitleElement = document.getElementById('feedback-title');
+    const feedbackCorrectAnswerElement = document.getElementById('feedback-correct-answer');
+    const feedbackExplanationElement = document.getElementById('feedback-explanation');
+    const feedbackLearningPointsElement = document.getElementById('feedback-learning-points');
+    const nextQuestionButton = document.getElementById('next-question-button');
+    const experiencePointsElement = document.getElementById('experience-points');
+    const completionPercentageElement = document.getElementById('completion-percentage');
+    const titleElement = document.getElementById('title');
+    const progressBarElement = document.getElementById('progress-bar');
+    const endTitleElement = document.getElementById('end-title');
+    const finalScoreElement = document.getElementById('final-score');
+    const incorrectQuestionsListElement = document.getElementById('incorrect-questions-list');
+    const restartGameButton = document.getElementById('restart-game-button');
+
+    // ゲームの状態変数
+    let currentQuestionIndex = 0;
+    let score = 0; // 得点として扱う
+    let correctAnswersCount = 0; // 正解数をカウント
+    let incorrectAnswers = []; // 不正解だった問題のインデックスを記録
+    let selectedOptionLi = null; // To keep track of the selected option li element
+
+    // パーティクルアニメーション
+    function createParticle() {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + 'vw';
+        particle.style.animationDelay = Math.random() * 2 + 's';
+        particle.style.animationDuration = (Math.random() * 3 + 3) + 's'; // Duration between 3s and 6s
+        document.body.appendChild(particle);
+
+        // Remove particle after animation ends to prevent too many elements
+        setTimeout(() => {
+            particle.remove();
+        }, parseFloat(particle.style.animationDuration) * 1000 + parseFloat(particle.style.animationDelay) * 1000);
+    }
+
+    // パーティクルを定期的に生成
+    let particleInterval; // Declare interval variable
+
+    function startParticles() {
+        if (!particleInterval) { // Only start if not already running
+           for(let i = 0; i < 20; i++) createParticle(); // Create initial burst
+           particleInterval = setInterval(createParticle, 500); // Generate particles periodically
+        }
+    }
+
+    function stopParticles() {
+        clearInterval(particleInterval);
+        particleInterval = null;
+        const existingParticles = document.querySelectorAll('.particle');
+        existingParticles.forEach(p => p.remove());
+    }
+
+
+    // 20問のクイズ問題データ
+    const quizData = [
+        {
+            question: "Fundoraの教育プログラムで、トレードの根源にある「期待値」という数学的概念との対話を始めることをお願いする理由は何ですか？",
+            options: [
+                "未来の価格を正確に当てるため",
+                "短期的な感情に流されないため",
+                "同じ行動を繰り返した際の平均的な利益を理解するため",
+                "ギャンブルとしてのトレードを楽しむため"
+            ],
+            correctAnswer: 2,
+            explanation: "トレードは「同じ行動を何百回、何千回と繰り返したとき、平均でいくら得られるか」を示す期待値を味方につける営みです。目先の勝ち負けではなく、長期的な視点が重要です。",
+            learningPoints: "期待値の概念、長期的な視点の重要性"
+        },
+        {
+            question: "プロスペクト理論が示す人間の心理的な偏見とは何ですか？",
+            options: [
+                "利益を損失よりも大きく感じる",
+                "損失を利益の約2倍以上大きく感じる",
+                "利益も損失も同じように感じる",
+                "リスクを好む傾向がある"
+            ],
+            correctAnswer: 1,
+            explanation: "プロスペクト理論は、人間が同じ金額であっても損失を利益の約2倍以上大きく感じてしまう心理的ゆがみを示します。これが統計的に優位な手法でもリアルマネーで崩壊する原因です。",
+            learningPoints: "プロスペクト理論、損失回避の本能、利益確定の誘惑"
+        },
+        {
+            question: "市場で生き残るための必須条件として、Fundoraが強調していることは何ですか？",
+            options: [
+                "高度なテクニカル分析の習得",
+                "最新の市場ニュースの迅速な把握",
+                "期待値に従った損切りルールと資金配分を機械的に守る「規律」",
+                "他のトレーダーとの情報交換"
+            ],
+            correctAnswer: 2,
+            explanation: "市場で生き残るためには、損失回避を過度に恐れる自分を自覚し、期待値に従った損切りルールと資金配分を機械的に守る「規律」が不可欠です。",
+            learningPoints: "規律の重要性、損切りルール、資金配分"
+        },
+        {
+            question: "金融商品取引法が目的としていることは何ですか？",
+            options: [
+                "金融機関の利益を最大化すること",
+                "投資家を保護し、金融市場の健全な発展を促進すること",
+                "海外からの投資を制限すること",
+                "新しい金融商品の開発を奨励すること"
+            ],
+            correctAnswer: 1,
+            explanation: "金融商品取引法は、投資家を保護し、金融市場の健全な発展を促進することを目的としています。違反には重い罰則が科せられます。",
+            learningPoints: "金融商品取引法の目的、投資家保護、市場の公正性"
+        },
+        {
+            question: "インサイダー取引（内部者取引）とはどのような行為ですか？",
+            options: [
+                "公開情報を分析して取引すること",
+                "企業の未公開の重要情報を利用して不当に利益を得ようとすること",
+                "多数のトレーダーと協力して価格を操作すること",
+                "SNSで株価に関する噂を広めること"
+            ],
+            correctAnswer: 1,
+            explanation: "インサイダー取引は、企業の未公開の重要情報を知り得た者が、その情報が公開される前に売買を行い、不当に利益を得ようとする行為で、市場公平性を著しく損ないます。",
+            learningPoints: "インサイダー取引の定義、重要事実、内部者の範囲"
+        },
+        {
+            question: "相場操縦の代表的な手口「見せ玉（Spoofing）」とはどのような行為ですか？",
+            options: [
+                "同一人物が売りと買いの注文を同時に出すこと",
+                "売り手と買い手が事前に価格や数量を打ち合わせること",
+                "大量の注文を一時的に発注し、約定直前に取り消すこと",
+                "根拠のない噂を流布すること"
+            ],
+            correctAnswer: 2,
+            explanation: "見せ玉（Spoofing）は、大量の買い注文（または売り注文）を一時的に発注し、他の市場参加者を誘導した後、約定する直前にその注文を取り消す相場操縦の手口です。",
+            learningPoints: "相場操縦の手口、見せ玉（Spoofing）、市場の歪み"
+        },
+        {
+            question: "Fundoraの学習環境において、複数のアカウント保有が原則として禁止されている理由は何ですか？",
+            options: [
+                "サーバーの負荷を軽減するため",
+                "学習履歴の正確な管理や公正な学習環境の維持を困難にするため",
+                "個人情報の保護を強化するため",
+                "サポート体制を効率化するため"
+            ],
+            correctAnswer: 1,
+            explanation: "複数のアカウント保有は、学習履歴の正確な管理や公正な学習環境の維持を困難にするため、原則としてお一人様につき一つのアカウントとされています。",
+            learningPoints: "アカウント管理の重要性、公正な学習環境"
+        },
+        {
+            question: "バルサラの破産確率が示す重要な点は何ですか？",
+            options: [
+                "常に高い勝率を維持すれば破産しないこと",
+                "1%トレーディング基準を守り適切な損益比を維持すれば、破産確率は限りなく低く抑えられること",
+                "初期資金が多ければ多いほど安全であること",
+                "損益比よりも勝率が重要であること"
+            ],
+            correctAnswer: 1,
+            explanation: "バルサラの破産確率は、1%トレーディング基準のような適切なリスク割合と損益比を維持すれば、破産確率を極めて低く抑えられることを数学的に示します。",
+            learningPoints: "バルサラの破産確率、リスク割合、損益比、資金管理"
+        },
+        {
+            question: "リスクリワード比（RR）が2:1の場合、損益分岐点となる最低限必要な勝率は何%ですか？",
+            options: [
+                "50.0%",
+                "40.0%",
+                "33.3%",
+                "25.0%"
+            ],
+            correctAnswer: 2,
+            explanation: "リスクリワード比が2:1の場合、必要勝率は 1 / (1 + 2) = 33.3% となります。つまり、3回に1回勝つだけで損益ゼロになります。",
+            learningPoints: "リスクリワード比、ブレイクイーブン勝率の計算"
+        },
+        {
+            question: "期待値（Expectancy）またはAPPT（Average Profit Per Trade）の基本公式で考慮される要素は何ですか？",
+            options: [
+                "勝率と平均利益のみ",
+                "敗率と平均損失のみ",
+                "勝率、平均利益、敗率、平均損失",
+                "取引回数と総損益"
+            ],
+            correctAnswer: 2,
+            explanation: "期待値(E) = 勝率(W) × 平均利益(Aw) - (1 - 勝率(W)) × 平均損失(Al)。この式は、勝率、平均利益、敗率（1-勝率）、平均損失の全てを考慮します。",
+            learningPoints: "期待値の計算式、APPT、戦略評価"
+        },
+        {
+            question: "Fundoraが推奨する1回の取引リスクの基準（1%トレーディング基準）とは何ですか？",
+            options: [
+                "1回の取引で口座残高の1%の利益を目指す",
+                "1回の取引で失うリスクを口座残高の1%以内に限定する",
+                "1日の取引回数を口座残高の1%に制限する",
+                "1つの銘柄への投資額を口座残高の1%にする"
+            ],
+            correctAnswer: 1,
+            explanation: "1%トレーディング基準とは、1回の取引で失うリスクを「口座残高の1%以内」に限定することです。これにより、一度の大損を防ぎ、安定した資金管理を目指します。",
+            learningPoints: "1%トレーディング基準、リスク管理、資金保護"
+        },
+        {
+            question: "外国為替市場（FX）の1日の取引高は世界のGDPの約何倍に相当しますか？",
+            options: [
+                "約10倍",
+                "約30倍",
+                "約60倍",
+                "約100倍"
+            ],
+            correctAnswer: 2,
+            explanation: "外国為替市場の1日の取引高は約7.5兆米ドル（2022年4月時点）に及び、これは世界のGDPの約60倍に相当する巨大な市場です。",
+            learningPoints: "FX市場の規模、グローバル経済"
+        },
+        {
+            question: "FX市場において、ロンドン市場とニューヨーク市場の取引時間が重複する時間帯（日本時間）は、どのような特徴がありますか？",
+            options: [
+                "流動性が低く、値動きが穏やか",
+                "アジア市場が主導し、円高になりやすい",
+                "特に流動性が厚く、大きなトレンド形成やボラティリティ拡大が見られやすい",
+                "経済指標の発表が少なく、テクニカル分析が効きやすい"
+            ],
+            correctAnswer: 2,
+            explanation: "日本時間の22:00–01:00頃はロンドン市場とニューヨーク市場が重複し、市場参加者が最も多くなるため、流動性が非常に高まり、大きな価格変動が起こりやすい時間帯です。",
+            learningPoints: "FX市場の取引時間帯、流動性、ボラティリティ"
+        },
+        {
+            question: "株式の「現物取引」と「信用取引」の主な違いは何ですか？",
+            options: [
+                "現物取引では配当がもらえないが、信用取引ではもらえる",
+                "現物取引はレバレッジがかけられるが、信用取引はかけられない",
+                "信用取引では空売りが可能だが、現物取引ではできない（一部例外除く）",
+                "信用取引の方が手数料が常に安い"
+            ],
+            correctAnswer: 2,
+            explanation: "信用取引の大きな特徴の一つは、証券会社から株を借りて売る「空売り」ができる点です。現物取引では基本的に買いからしか入れません。また、信用取引ではレバレッジをかけることができます。",
+            learningPoints: "現物取引、信用取引、空売り、レバレッジ"
+        },
+        {
+            question: "債券価格と市場金利（利回り）の関係について正しい説明はどれですか？",
+            options: [
+                "市場金利が上昇すると、既発債の価格は上昇する",
+                "市場金利が上昇すると、既発債の価格は下落する",
+                "市場金利と既発債の価格は無関係である",
+                "市場金利が下落すると、既発債の価格も下落する"
+            ],
+            correctAnswer: 1,
+            explanation: "債券価格と利回り（市場金利）は逆相関の関係にあります。市場金利が上昇すると、新しく発行される債券の利率が魅力的になるため、相対的に利率の低い既発債の価格は下落します。",
+            learningPoints: "債券価格と金利の関係、逆相関、デュレーション"
+        },
+        {
+            question: "株価指数先物取引における「SQ（特別清算指数）」とは何ですか？",
+            options: [
+                "毎日の取引終了時の価格",
+                "先物契約の最終決済を行うための特別な価格",
+                "投資家が任意に設定できる決済価格",
+                "取引所のシステムが自動計算する理論価格"
+            ],
+            correctAnswer: 1,
+            explanation: "SQ（Special Quotation）は、株価指数先物やオプション取引において、各限月の最終取引日を過ぎた後に、最終的な決済を行うために算出される特別な清算価格のことです。",
+            learningPoints: "株価指数先物、SQ、最終決済"
+        },
+        {
+            question: "CFD（差金決済取引）の主な特徴は何ですか？",
+            options: [
+                "実際の原資産を保有して取引する",
+                "レバレッジをかけることができない",
+                "売買価格差のみを金銭で決済し、実物の受渡しは行わない",
+                "取引時間が原資産の市場時間に限定される"
+            ],
+            correctAnswer: 2,
+            explanation: "CFDは、実際の株式や商品などの原資産を保有せず、売買価格の差額のみを決済する取引です。これにより、少額の証拠金でレバレッジを効かせた取引が可能です。",
+            learningPoints: "CFDの仕組み、差金決済、レバレッジ"
+        },
+        {
+            question: "市場リスクの中でも「方向性リスク（Directional Risk）」を管理する最も基本的なツールは何ですか？",
+            options: [
+                "ボラティリティ指数（VIX）の確認",
+                "ポートフォリオの分散",
+                "ストップロス注文の設定",
+                "経済指標カレンダーの確認"
+            ],
+            correctAnswer: 2,
+            explanation: "方向性リスク、つまり予想と逆方向に価格が動くリスクを管理する最も基本的な方法は、損失を一定範囲に限定するためのストップロス注文を設定することです。",
+            learningPoints: "市場リスク、方向性リスク、ストップロス注文"
+        },
+        {
+            question: "ヘッジファンドの主要戦略の一つ「グローバルマクロ戦略」とはどのようなものですか？",
+            options: [
+                "割高株を売り、割安株を買う戦略",
+                "市場の方向性リスクを排除した取引戦略",
+                "経済・政治動向に基づいて通貨や債券などを取引する戦略",
+                "企業のM&Aや倒産などのイベントに特化した戦略"
+            ],
+            correctAnswer: 2,
+            explanation: "グローバルマクロ戦略は、世界各国の経済状況、金融政策、政治動向などを分析し、それに基づいて為替、株式、債券、商品など幅広い資産クラスで収益機会を追求するヘッジファンドの戦略です。",
+            learningPoints: "ヘッジファンド戦略、グローバルマクロ、市場分析"
+        },
+        {
+            question: "高頻度取引（HFT）が市場に与えるポジティブな影響として挙げられるものは何ですか？",
+            options: [
+                "市場のボラティリティを高めること",
+                "個人投資家にとって有利な状況を作り出すこと",
+                "流動性を向上させ、スプレッドを縮小させること",
+                "市場の透明性を低下させること"
+            ],
+            correctAnswer: 2,
+            explanation: "HFTは、常時ビッド・オファーを提示することで市場の流動性を向上させ、競争によってスプレッド（売値と買値の差）を縮小させる効果があると考えられています。",
+            learningPoints: "高頻度取引（HFT）、市場への影響、流動性、スプレッド"
+        }
+    ];
+
+
+    // ゲーム開始処理
+    startGameButton.addEventListener('click', () => {
+        startScreen.style.display = 'none';
+        gameScreen.style.display = 'block';
+        endScreenElement.style.display = 'none'; // Ensure end screen is hidden
+        currentQuestionIndex = 0;
+        score = 0;
+        correctAnswersCount = 0;
+        incorrectAnswers = [];
+        updateStatus();
+        displayQuestion();
+        startParticles(); // Start particle animation
+    });
+
+    // 問題を表示する関数
+    function displayQuestion() {
+        // Reset animations for question area and options
+        questionArea.style.animation = 'none';
+        void questionArea.offsetWidth; // Trigger reflow
+        questionArea.style.animation = 'slideIn 0.5s ease-out forwards';
+
+        const currentQuiz = quizData[currentQuestionIndex];
+        questionNumberElement.textContent = `問題 ${currentQuestionIndex + 1}/${quizData.length}`;
+        questionTextElement.textContent = currentQuiz.question;
+
+        optionsListElement.innerHTML = ''; // Clear previous options
+        currentQuiz.options.forEach((option, index) => {
+            const li = document.createElement('li');
+            li.textContent = option;
+            li.dataset.index = index; // Store index for answer checking
+            // Reset option animation
+            li.style.animation = 'none';
+            void li.offsetWidth; // Trigger reflow
+            li.style.animation = `slideInOptions 0.5s ease-out ${0.1 * (index + 1)}s forwards`;
+
+            li.addEventListener('click', handleOptionClick);
+            optionsListElement.appendChild(li);
+        });
+        questionArea.style.display = 'block';
+        feedbackArea.style.display = 'none';
+        nextQuestionButton.style.display = 'none'; // Hide next button until answer
+    }
+
+    // 選択肢クリック処理
+    function handleOptionClick(event) {
+        // Remove selected class from previously selected option, if any
+        if (selectedOptionLi) {
+            selectedOptionLi.classList.remove('selected');
+        }
+        selectedOptionLi = event.target;
+        selectedOptionLi.classList.add('selected'); // Highlight selected option
+
+        // Disable further clicks on options after one is selected
+        const options = optionsListElement.querySelectorAll('li');
+        options.forEach(opt => opt.removeEventListener('click', handleOptionClick)); // Remove listeners to prevent re-selection
+        options.forEach(opt => opt.style.cursor = 'default'); // Change cursor
+
+        checkAnswer(parseInt(selectedOptionLi.dataset.index));
+    }
+
+
+    // 回答チェック処理
+    function checkAnswer(selectedIndex) {
+        const currentQuiz = quizData[currentQuestionIndex];
+        const isCorrect = selectedIndex === currentQuiz.correctAnswer;
+
+        feedbackArea.classList.remove('correct', 'incorrect'); // Remove previous classes
+        // Trigger reflow to restart animation
+        feedbackArea.style.animation = 'none';
+        void feedbackArea.offsetWidth;
+
+
+        if (isCorrect) {
+            score += 5; // 例えば正解で5点
+            correctAnswersCount++;
+            feedbackTitleElement.textContent = '正解！';
+            feedbackArea.classList.add('correct');
+            feedbackCorrectAnswerElement.textContent = ''; // 正解なので正答は表示しない
+        } else {
+            feedbackTitleElement.textContent = '不正解...';
+            feedbackArea.classList.add('incorrect');
+            feedbackCorrectAnswerElement.textContent = `正解は: ${currentQuiz.options[currentQuiz.correctAnswer]}`;
+            incorrectAnswers.push(currentQuestionIndex); // 不正解の問題を記録
+        }
+
+        feedbackExplanationElement.textContent = `解説: ${currentQuiz.explanation}`;
+        feedbackLearningPointsElement.textContent = `学習ポイント: ${currentQuiz.learningPoints}`;
+
+        feedbackArea.style.display = 'block';
+        // Apply animation after display is set to block
+        feedbackArea.style.animation = `${isCorrect ? 'correctShake' : 'incorrectShake'} 0.6s ease-in-out, feedbackSlide 0.5s ease-out forwards`;
+
+
+        nextQuestionButton.style.display = 'inline-block'; // Show next button
+        updateStatus();
+    }
+
+    // 次の問題へ進む処理
+    nextQuestionButton.addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (selectedOptionLi) { // Reset selected option for next question
+            selectedOptionLi.classList.remove('selected');
+            selectedOptionLi = null;
+        }
+        if (currentQuestionIndex < quizData.length) {
+            displayQuestion();
+        } else {
+            showEndScreen();
+        }
+    });
+
+    // ステータス更新処理
+    function updateStatus() {
+        experiencePointsElement.textContent = `得点: ${score}`;
+        const percentage = Math.round(((currentQuestionIndex) / quizData.length) * 100); // Progress based on answered questions
+        completionPercentageElement.textContent = `進行度: ${percentage}%`;
+        progressBarElement.style.width = `${percentage}%`;
+
+        // 称号の更新ロジック（例）
+        if (score >= 80) titleElement.textContent = '称号: プロトレーダー';
+        else if (score >= 60) titleElement.textContent = '称号: 上級トレーダー';
+        else if (score >= 40) titleElement.textContent = '称号: 中級トレーダー';
+        else if (score >= 20) titleElement.textContent = '称号: 初心者トレーダー';
+        else titleElement.textContent = '称号: 見習い';
+    }
+
+    // ゲーム終了画面表示処理
+    function showEndScreen() {
+        gameScreen.style.display = 'none';
+        endScreenElement.style.display = 'block'; // Corrected variable name
+        stopParticles(); // Stop particle animation
+
+        let endMessage = "";
+        if (correctAnswersCount === quizData.length) {
+            endMessage = "全問正解！素晴らしいです、プロトレーダー！";
+        } else if (correctAnswersCount >= quizData.length * 0.8) {
+            endMessage = "おめでとうございます！優秀な成績です！";
+        } else if (correctAnswersCount >= quizData.length * 0.6) {
+            endMessage = "よくできました！あと少しで高みへ！";
+        } else if (correctAnswersCount >= quizData.length * 0.4) {
+            endMessage = "まずまずの成績です。更なる学習で上を目指しましょう！";
+        } else {
+            endMessage = "お疲れ様でした。基礎からもう一度復習しましょう！";
+        }
+        endTitleElement.textContent = endMessage;
+        finalScoreElement.textContent = `最終得点: ${score}点 (${correctAnswersCount}/${quizData.length}問正解)`;
+
+        incorrectQuestionsListElement.innerHTML = ''; // Clear previous list
+        if (incorrectAnswers.length > 0) {
+            incorrectAnswers.forEach((qIndex, displayIndex) => {
+                const li = document.createElement('li');
+                li.textContent = `問題 ${qIndex + 1}: ${quizData[qIndex].question.substring(0, 50)}... （正解: ${quizData[qIndex].options[quizData[qIndex].correctAnswer]}）`;
+                // Apply animation with delay
+                li.style.animationDelay = `${0.1 * (displayIndex + 1)}s`;
+                incorrectQuestionsListElement.appendChild(li);
+            });
+        } else {
+            const li = document.createElement('li');
+            li.textContent = "不正解だった問題はありません。完璧です！";
+            incorrectQuestionsListElement.appendChild(li);
+        }
+    }
+
+    // もう一度挑戦する処理
+    restartGameButton.addEventListener('click', () => {
+        endScreenElement.style.display = 'none'; // Corrected variable name
+        startScreen.style.display = 'block';
+        // Reset particles if needed, or let them continue if preferred for main screen
+    });
+
+    // 初期表示
+    startScreen.style.display = 'block';
+    gameScreen.style.display = 'none';
+    endScreenElement.style.display = 'none'; // Corrected variable name
+
+</script>
+</body>
+</html>
